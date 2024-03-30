@@ -5,11 +5,13 @@ import ass01
 warnings.filterwarnings("error")
 
 ratings, movies = ass01.read("../dataset/ratings.csv", "../dataset/movies.csv") #read csv files necessary
-
 USER_A = int(sys.argv[1])
-print(USER_A)
+while USER_A == None or USER_A <= 0 or USER_A > 610:
+    print(f'This user does not exist. Pick an Id in range(1, 610)')
+    USER_A = int(input())
+
 USER_A_ratings = ass01.get_usr_rows(ratings, 'userId', USER_A)
-USER_A_films = ass01.get_column(ratings, 'movieId')
+USER_A_films = ass01.get_column(USER_A_ratings, 'movieId')
 
 rows_count = len(ratings) #number of rows
 print(f'ratings.csv has {rows_count} rows. ') #check number of rows

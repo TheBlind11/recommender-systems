@@ -111,24 +111,24 @@ def get_single_similarity(userB, userA_ratings, ratings, dict):
     userB_ratings = get_usr_rows(ratings, 'userId', userB)
     
     #pearson correlation
-    #corr = pearson_correlation(USER_A_ratings, user_b_ratings) #calculate pearson correlation value between the users
+    #corr = pearson_correlation(userA_ratings, userB_ratings) #calculate pearson correlation value between the users
     #if not math.isnan(corr):
-        #dict.update({user : corr}) #add the user and the related pearson correlation value
+        #dict.update({userB : corr}) #add the user and the related pearson correlation value
     
     #jaccard similarity
-    #jac = jaccard_similarity(USER_A_ratings, user_b_ratings)
+    #jac = jaccard_similarity(userA_ratings, userB_ratings)
     #if not math.isnan(jac):
-        #dict.update({user : jac})
+        #dict.update({userB : jac})
 
     #cosine similarity
-    #cos = cosine_similarity(USER_A_ratings, user_b_ratings)
-    #if not math.isnan(cos):
-        #dict.update({user : cos})
+    cos = cosine_similarity(userA_ratings, userB_ratings)
+    if not math.isnan(cos):
+        dict.update({userB : cos})
 
     #euclidean distance
-    dis = euclidean_distance_similarity(userA_ratings, userB_ratings)
-    if not math.isnan(dis):
-        dict.update({userB : dis})
+    #dis = euclidean_distance_similarity(userA_ratings, userB_ratings)
+    #if not math.isnan(dis):
+        #dict.update({userB : dis})
 
 def get_all_similarities(userA, userA_ratings, ratings, users, dict):
     pd.DataFrame.from_dict(users).map(lambda x: get_single_similarity(x, userA_ratings, ratings, dict) if(x != userA) else None) #call the function of similarity on every user
