@@ -1,7 +1,8 @@
 import sys
 import warnings
-sys.path.append("../ass-01")
 import math
+import numpy as np
+sys.path.append("../ass-01")
 import ass01
 
 def get_single_prediction(userA, ratings, movie, movies, top10usr, dict):
@@ -12,14 +13,25 @@ def get_single_prediction(userA, ratings, movie, movies, top10usr, dict):
 def get_all_predictions(userA, ratings, movies, column, top10usr, dict):
     movies[column].map(lambda x: get_single_prediction(userA, ratings, x, movies, top10usr, dict))
 
-def get_predicted_mvs(input_users, ratings, movies): #function that gets 10 predicted movies for every user in input (from ass01)
+def get_top10(map):
+    return dict(sorted(map.items(), key=lambda x:x[1]['msd'], reverse=False)[:10])
+
+def get_titles(top10, movies):
+    top10_titles = dict()
+    for movie in top10.keys():
+        value = top10[movie]
+        top10_titles[movies[movies['movieId'] == movie].iloc[0]['title']] = value
+
+    return top10_titles
+
+def get_predicted_mvs(input_users, ratings, movies, function): #function that gets 10 predicted movies for every user in input (from ass01)
     pred_movies = dict()
     similar_users = dict()
     df_users = ass01.get_all_users(ratings)
     for user in input_users:
         user_ratings = ass01.get_usr_rows(ratings, 'userId', user)
         topusers = dict()
-        ass01.get_all_similarities(user, user_ratings, ratings, df_users, topusers) #get the similarity on every user of df
+        ass01.get_all_similarities(user, user_ratings, ratings, df_users, topusers, function) #get the similarity on every user of df
         top10usr = ass01.get_top10(topusers) #get top 10 users similar to user in input
         similar_users[user] = top10usr #save most similar users to user in input 
 
@@ -39,12 +51,12 @@ def get_predicted_mvs(input_users, ratings, movies): #function that gets 10 pred
     return (pred_movies, similar_users)
 
 def avg_method(users, pred_movies, similar_users, ratings):
-    avg = 0
     for movie in pred_movies.keys():
+        avg = 0
         for user in users:
             pred = 0
             try:
-                pred = pred_movies[movie][user] #try if this movie has already been predicted for user in input
+                pred_movies[movie][user] #try if this movie has already been predicted for user in input
             except:
                 user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get user's ratings
                 mvs_rated = ass01.get_column(user_ratings, 'movieId') #get movies rated by user in input
@@ -53,10 +65,12 @@ def avg_method(users, pred_movies, similar_users, ratings):
                 else:
                     pred = ass01.prediction(user, similar_users[user], movie, ratings) #unless, get its rate prediction
                 
+                if math.isnan(pred): #check if the prediction score is nan
+                    pred = ass01.get_column(user_ratings, 'rating').mean() #get the mean of user's ratings as prediction
+                
                 pred_movies[movie][user] = pred #update the score of the user in input for the movie
-
-            if not math.isnan(pred):
-                avg += pred
+                
+            avg += pred #update avg score
         
         avg = avg/len(users) #get the mean of the scores as the group score
         pred_movies[movie] = avg #update the group score for the movie as average method
@@ -77,9 +91,39 @@ def least_misery_method(users, pred_movies, similar_users, ratings):
                 else:
                     pred = ass01.prediction(user, similar_users[user], movie, ratings) #unless, get its rate prediction
 
-                if not math.isnan(pred):
-                    pred_movies[movie][user] = pred #update the score of the user in input for the movie
+                if math.isnan(pred): #check if the prediction score is nan
+                    pred = ass01.get_column(user_ratings, 'rating').mean() #get the mean of user's ratings as prediction
+                    
+                pred_movies[movie][user] = pred #update the score of the user in input for the movie
             
         pred_movies[movie] = min(dict(pred_movies[movie]).values()) #update the group score for the movie as least misery method
 
-    return pred_movies    
+    return pred_movies
+
+def mean_squared_deviation_method(users, pred_movies, similar_users, ratings):
+    for movie in pred_movies.keys():
+        avg = 0
+        for user in users:
+            pred = 0
+            try:
+                pred_movies[movie][user] #try if this movie has already been predicted for user in input
+            except:
+                user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get user's ratings
+                mvs_rated = ass01.get_column(user_ratings, 'movieId') #get movies rated by user in input
+                if movie in set(mvs_rated): #if user has already watched the movie
+                    pred = user_ratings[user_ratings['movieId'] == movie].iloc[0]['rating'] #get its rate 
+                else:
+                    pred = ass01.prediction(user, similar_users[user], movie, ratings) #unless, get its rate prediction
+                
+                if math.isnan(pred): #check if the prediction score is nan
+                    pred = ass01.get_column(user_ratings, 'rating').mean() #get the mean of user's ratings as prediction
+                
+                pred_movies[movie][user] = pred #update the score of the user in input for the movie
+                
+            avg += pred #update avg score
+        
+        avg = avg/len(users) #get the mean of the scores as the group score
+        msd = np.sqrt((np.sum(np.array(list(dict(pred_movies[movie]).values())) - avg)**2)/len(users)) #mean squared deviation between single user prediction and avg prediction of group of users for the movie
+        pred_movies[movie] = {'avg' : avg, 'msd' : msd} #update the group score for the movie as msd method
+
+    return pred_movies

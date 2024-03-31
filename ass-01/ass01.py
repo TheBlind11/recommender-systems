@@ -107,31 +107,35 @@ def prediction(userId, top10, movieId, ratings): #prediction function
     
     return pred
 
-def get_single_similarity(userB, userA_ratings, ratings, dict):
+def get_single_similarity(userB, userA_ratings, ratings, dict, function):
     userB_ratings = get_usr_rows(ratings, 'userId', userB)
     
     #pearson correlation
-    #corr = pearson_correlation(userA_ratings, userB_ratings) #calculate pearson correlation value between the users
-    #if not math.isnan(corr):
-        #dict.update({userB : corr}) #add the user and the related pearson correlation value
+    if function == 'pc':
+        sim = pearson_correlation(userA_ratings, userB_ratings) #calculate pearson correlation value between the users
+        if not math.isnan(sim):
+            dict.update({userB : sim}) #add the user and the related pearson correlation value
     
     #jaccard similarity
-    #jac = jaccard_similarity(userA_ratings, userB_ratings)
-    #if not math.isnan(jac):
-        #dict.update({userB : jac})
+    elif function == 'js':
+        sim = jaccard_similarity(userA_ratings, userB_ratings)
+        if not math.isnan(sim):
+            dict.update({userB : sim})
 
     #cosine similarity
-    cos = cosine_similarity(userA_ratings, userB_ratings)
-    if not math.isnan(cos):
-        dict.update({userB : cos})
+    elif function == 'cs':
+        sim = cosine_similarity(userA_ratings, userB_ratings)
+        if not math.isnan(sim):
+            dict.update({userB : sim})
 
     #euclidean distance
-    #dis = euclidean_distance_similarity(userA_ratings, userB_ratings)
-    #if not math.isnan(dis):
-        #dict.update({userB : dis})
+    elif function == 'ed':
+        sim = euclidean_distance_similarity(userA_ratings, userB_ratings)
+        if not math.isnan(sim):
+            dict.update({userB : sim})
 
-def get_all_similarities(userA, userA_ratings, ratings, users, dict):
-    pd.DataFrame.from_dict(users).map(lambda x: get_single_similarity(x, userA_ratings, ratings, dict) if(x != userA) else None) #call the function of similarity on every user
+def get_all_similarities(userA, userA_ratings, ratings, users, dict, function):
+    pd.DataFrame.from_dict(users).map(lambda x: get_single_similarity(x, userA_ratings, ratings, dict, function) if(x != userA) else None) #call the function of similarity on every user
 
 def get_single_prediction(userA, ratings, movie, movies, top10usr, dict):
     prd = prediction(userA, top10usr, movie, ratings) #calculate prediction on a specific movie
