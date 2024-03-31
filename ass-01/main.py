@@ -23,7 +23,7 @@ users = ass01.get_all_users(ratings) #all the users of the dataset
 topusers = dict() #all the similarities between user in input and other users
 ass01.get_all_similarities(USER_A, USER_A_ratings, ratings, users, topusers, args.function) #get the similarity on every user
 top10usr = ass01.get_top10(topusers) #get top 10 users similar to user in input
-print(f'Top 10 users similar to user {USER_A} are {top10usr}')    
+print(f'Top 10 users similar to user {USER_A} with {args.function} similarity function are {top10usr}')    
 
 mvs = ass01.get_df_difference(movies, USER_A_films) #get movies not rated by user
 mvs_sugg = dict() #movies to sugget to user in input

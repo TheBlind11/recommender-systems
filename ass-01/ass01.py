@@ -27,7 +27,7 @@ def jaccard_similarity(df_user1, df_user2): #Jaccard similarity function for com
         return math.nan
 
     try:
-        jac = len(same_rates)/len(merged_ratings)
+        jac = same_rates/len(merged_ratings)
     except (RuntimeWarning, ZeroDivisionError):
         return math.nan
 

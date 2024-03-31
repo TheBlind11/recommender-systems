@@ -7,7 +7,6 @@ def parser():
     #Create sub-parsers
     subparsers = parser.add_subparsers(dest='function', help='Available similarity functions')
 
-    #Create a sub-parser for the 'add' operation
     add_parser_pc = subparsers.add_parser('pc', help='Pearson correlation function')
     add_parser_pc.add_argument('user', type=int, help='Input user')
 

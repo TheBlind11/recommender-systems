@@ -28,6 +28,6 @@ elif args.method == 'msd':
     all_mvs = ass02.mean_squared_deviation_method(USERS, all_mvs, all_users, ratings)
     top10mvs = ass02.get_top10(all_mvs)
 
-print(f'Top 10 films to suggest to users {USERS} in input with {args.method} method are {ass02.get_titles(top10mvs, movies)}')
+print(f'Top 10 films to suggest to users {USERS} in input with {args.method} method and {args.function} similarity function are {ass02.get_titles(top10mvs, movies)}')
 
 
