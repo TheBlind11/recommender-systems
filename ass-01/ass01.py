@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 def read(file_path1, file_path2):
-    ratings = pd.read_csv(file_path1).drop('timestamp', axis = 1) #open csv file and drop 'timestamp' column, it is not necessary
+    ratings = pd.read_csv(file_path1).drop(['timestamp'], axis = 1) #open csv file and drop 'timestamp' column, it is not necessary
     movies = pd.read_csv(file_path2).drop(['genres'], axis = 1) #open csv file and drop 'timestamp'  and 'genres' columns, they are not necessary
 
     return (ratings, movies)

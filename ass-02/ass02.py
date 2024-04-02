@@ -1,5 +1,4 @@
 import sys
-import warnings
 import math
 import numpy as np
 sys.path.append("../ass-01")
@@ -50,79 +49,66 @@ def get_predicted_mvs(input_users, ratings, movies, function): #function that ge
 
     return (pred_movies, similar_users)
 
+def avg_function(users, similar_users, movie, pred_movies, ratings):
+    avg = 0
+    for user in users:
+        pred = 0
+        try:
+            pred_movies[movie][user] #try if this movie has already been predicted for user in input
+        except:
+            user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get user's ratings
+            mvs_rated = ass01.get_column(user_ratings, 'movieId') #get movies rated by user in input
+            if movie in set(mvs_rated): #if user has already watched the movie
+                pred = user_ratings[user_ratings['movieId'] == movie].iloc[0]['rating'] #get its rate 
+            else:
+                pred = ass01.prediction(user, similar_users[user], movie, ratings) #unless, get its rate prediction
+                
+            if math.isnan(pred): #check if the prediction score is nan
+                pred = ass01.get_column(user_ratings, 'rating').mean() #get the mean of user's ratings as prediction
+                
+            pred_movies[movie][user] = pred #update the score of the user in input for the movie
+                
+        avg += pred #update avg score
+        
+    return avg/len(users) #get the mean of the scores as the group score
+
 def avg_method(users, pred_movies, similar_users, ratings):
     for movie in pred_movies.keys():
-        avg = 0
-        for user in users:
-            pred = 0
-            try:
-                pred_movies[movie][user] #try if this movie has already been predicted for user in input
-            except:
-                user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get user's ratings
-                mvs_rated = ass01.get_column(user_ratings, 'movieId') #get movies rated by user in input
-                if movie in set(mvs_rated): #if user has already watched the movie
-                    pred = user_ratings[user_ratings['movieId'] == movie].iloc[0]['rating'] #get its rate 
-                else:
-                    pred = ass01.prediction(user, similar_users[user], movie, ratings) #unless, get its rate prediction
-                
-                if math.isnan(pred): #check if the prediction score is nan
-                    pred = ass01.get_column(user_ratings, 'rating').mean() #get the mean of user's ratings as prediction
-                
-                pred_movies[movie][user] = pred #update the score of the user in input for the movie
-                
-            avg += pred #update avg score
-        
-        avg = avg/len(users) #get the mean of the scores as the group score
+        avg = avg_function(users, similar_users, movie, pred_movies, ratings)
         pred_movies[movie] = avg #update the group score for the movie as average method
 
     return pred_movies
 
+def least_misery_function(users, similar_users, movie, pred_movies, ratings):
+    for user in users:
+        try:
+            pred_movies[movie][user] #try if this movie has already been predicted for user in input
+        except:
+            pred = 0
+            user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get user ratings
+            mvs_rated = ass01.get_column(user_ratings, 'movieId') #get movies rated by user in input
+            if movie in set(mvs_rated): #if user has already watched the movie
+                pred = user_ratings[user_ratings['movieId'] == movie].iloc[0]['rating'] #get its rate 
+            else:
+                pred = ass01.prediction(user, similar_users[user], movie, ratings) #unless, get its rate prediction
+
+            if math.isnan(pred): #check if the prediction score is nan
+                pred = ass01.get_column(user_ratings, 'rating').mean() #get the mean of user's ratings as prediction
+                    
+            pred_movies[movie][user] = pred #update the score of the user in input for the movie
+
+    return min(dict(pred_movies[movie]).values()) #get the minimum value of predictions as group score 
+
 def least_misery_method(users, pred_movies, similar_users, ratings):
     for movie in pred_movies.keys():
-        for user in users:
-            try:
-                pred_movies[movie][user] #try if this movie has already been predicted for user in input
-            except:
-                pred = 0
-                user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get user ratings
-                mvs_rated = ass01.get_column(user_ratings, 'movieId') #et movies rated by user in input
-                if movie in set(mvs_rated): #if user has already watched the movie
-                    pred = user_ratings[user_ratings['movieId'] == movie].iloc[0]['rating'] #get its rate 
-                else:
-                    pred = ass01.prediction(user, similar_users[user], movie, ratings) #unless, get its rate prediction
-
-                if math.isnan(pred): #check if the prediction score is nan
-                    pred = ass01.get_column(user_ratings, 'rating').mean() #get the mean of user's ratings as prediction
-                    
-                pred_movies[movie][user] = pred #update the score of the user in input for the movie
-            
-        pred_movies[movie] = min(dict(pred_movies[movie]).values()) #update the group score for the movie as least misery method
+        min = least_misery_function(users, similar_users, movie, pred_movies, ratings)
+        pred_movies[movie] =  min #update the group score for the movie as least misery method
 
     return pred_movies
 
 def mean_squared_deviation_method(users, pred_movies, similar_users, ratings):
     for movie in pred_movies.keys():
-        avg = 0
-        for user in users:
-            pred = 0
-            try:
-                pred_movies[movie][user] #try if this movie has already been predicted for user in input
-            except:
-                user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get user's ratings
-                mvs_rated = ass01.get_column(user_ratings, 'movieId') #get movies rated by user in input
-                if movie in set(mvs_rated): #if user has already watched the movie
-                    pred = user_ratings[user_ratings['movieId'] == movie].iloc[0]['rating'] #get its rate 
-                else:
-                    pred = ass01.prediction(user, similar_users[user], movie, ratings) #unless, get its rate prediction
-                
-                if math.isnan(pred): #check if the prediction score is nan
-                    pred = ass01.get_column(user_ratings, 'rating').mean() #get the mean of user's ratings as prediction
-                
-                pred_movies[movie][user] = pred #update the score of the user in input for the movie
-                
-            avg += pred #update avg score
-        
-        avg = avg/len(users) #get the mean of the scores as the group score
+        avg = avg_function(users, similar_users, movie, pred_movies, ratings)
         msd = np.sqrt((np.sum(np.array(list(dict(pred_movies[movie]).values())) - avg)**2)/len(users)) #mean squared deviation between single user prediction and avg prediction of group of users for the movie
         pred_movies[movie] = {'avg' : avg, 'msd' : msd} #update the group score for the movie as msd method
 
