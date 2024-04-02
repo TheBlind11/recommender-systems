@@ -16,17 +16,17 @@ while len(USERS) < 2:
     USERS.append(int(input()))
 
 ratings, movies = ass01.read("../dataset/ratings.csv", "../dataset/movies.csv") #read csv files necessary
-all_mvs, all_users = ass02.get_predicted_mvs(USERS, ratings, movies, args.function)
+pred_mvs, sim_users = ass02.get_predicted_mvs(USERS, ratings, movies, args.function)
 
 if args.method == 'avg':
-    all_mvs = ass02.avg_method(USERS, all_mvs, all_users, ratings)
-    top10mvs = ass01.get_top10(all_mvs)
+    pred_mvs = ass02.avg_method(USERS, pred_mvs, sim_users, ratings)
+    top10mvs = ass01.get_top10(pred_mvs)
 elif args.method == 'lm':
-    all_mvs = ass02.least_misery_method(USERS, all_mvs, all_users, ratings)
-    top10mvs = ass01.get_top10(all_mvs)
+    pred_mvs = ass02.least_misery_method(USERS, pred_mvs, sim_users, ratings)
+    top10mvs = ass01.get_top10(pred_mvs)
 elif args.method == 'msd':
-    all_mvs = ass02.mean_squared_deviation_method(USERS, all_mvs, all_users, ratings)
-    top10mvs = ass02.get_top10(all_mvs)
+    pred_mvs = ass02.mean_squared_deviation_method(USERS, pred_mvs, sim_users, ratings)
+    top10mvs = ass02.get_top10(pred_mvs)
 
 print(f'Top 10 films to suggest to users {USERS} in input with {args.method} method and {args.function} similarity function are {ass02.get_titles(top10mvs, movies)}')
 
