@@ -22,7 +22,10 @@ while len(USERS) < 2:
 ratings, movies = ass01.read("../dataset/ratings.csv", "../dataset/movies.csv") #read csv files necessary
 pred_mvs, sim_users = ass02.get_predicted_mvs(USERS, ratings, movies, args.function)
 
-seq_mvs = ass03.sequential_recommendation(N_ITERATIONS, N_FILMS, USERS, pred_mvs, sim_users, ratings)
+if args.method == 'seq':
+    seq_mvs = ass03.sequential_recommendation(N_ITERATIONS, N_FILMS, USERS, pred_mvs, sim_users, ratings)
+elif args.method == 'msd':
+    seq_mvs = ass03.sequential_msd_recommendation(N_ITERATIONS, N_FILMS, USERS, pred_mvs, sim_users, ratings)
 
 print(f'Top 10 films to suggest to users {USERS} in input with {args.method} method and {args.function} similarity function are {ass02.get_titles(seq_mvs, movies)}')
 

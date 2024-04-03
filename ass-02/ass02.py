@@ -54,7 +54,7 @@ def avg_function(users, similar_users, movie, pred_movies, ratings):
     for user in users:
         pred = 0
         try:
-            pred_movies[movie][user] #try if this movie has already been predicted for user in input
+            pred = pred_movies[movie][user] #try if this movie has already been predicted for user in input       
         except:
             user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get user's ratings
             mvs_rated = ass01.get_column(user_ratings, 'movieId') #get movies rated by user in input
@@ -69,7 +69,7 @@ def avg_function(users, similar_users, movie, pred_movies, ratings):
             pred_movies[movie][user] = pred #update the score of the user in input for the movie
                 
         avg += pred #update avg score
-        
+  
     return avg/len(users) #get the mean of the scores as the group score
 
 def avg_method(users, pred_movies, similar_users, ratings):

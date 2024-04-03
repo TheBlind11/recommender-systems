@@ -20,6 +20,9 @@ def alpha_update(user_sat):
 def seq_hybrid_aggregation(alpha, avg, lm):
     return ((1 - alpha) * avg) + (alpha * lm)
 
+def seq_hybrid_msd_aggregation(alpha, avg, lm, msd):
+    return ((1 - alpha) * avg) + (alpha * lm) + (alpha * msd)
+
 def get_avg_lm(users, similar_users, movie, pred_movies, ratings):
     return (ass02.avg_function(users, similar_users, movie, pred_movies, ratings), ass02.least_misery_function(users, similar_users, movie, pred_movies, ratings))
 
@@ -61,6 +64,37 @@ def sequential_recommendation(iterations, mvs_number, users, pred_movies, simila
             n = (mvs_number//iterations) + 1
         else:
             n = mvs_number//iterations    
+        
+        seq_mvs = get_topN(seq_mvs, n)
+        output_mvs.update(seq_mvs.copy())
+
+    return output_mvs
+
+def sequential_msd_recommendation(iterations, mvs_number, users, pred_movies, similar_users, ratings):
+    alpha = 0 #alpha parameter
+    output_mvs = dict() #this will be the output of the group recommendation
+    
+    avg_lm_msd_mvs = dict() #dict to 
+    for i in range(iterations):
+        seq_mvs = dict()
+        if i > 0:
+            user_sat = user_satisfaction(users, pred_movies, output_mvs, ratings)
+            alpha = alpha_update(user_sat)
+        
+        mvs_keys = pred_movies.keys() - output_mvs.keys()
+        for movie in mvs_keys:   
+            if i == 0:
+                avg, lm = get_avg_lm(users, similar_users, movie, pred_movies, ratings)
+                msd = np.sqrt((np.sum(np.array(list(dict(pred_movies[movie]).values())) - avg)**2)/len(users))
+                avg_lm_msd_mvs[movie] = {'avg' : avg, 'lm' : lm, 'msd' : msd}
+            
+            seq_value = seq_hybrid_msd_aggregation(alpha, avg_lm_msd_mvs[movie]['avg'], avg_lm_msd_mvs[movie]['lm'], avg_lm_msd_mvs[movie]['msd'])
+            seq_mvs[movie] = seq_value
+
+        if i == 2:
+            n = (mvs_number//iterations) + 1
+        else:
+            n = mvs_number//iterations 
         
         seq_mvs = get_topN(seq_mvs, n)
         output_mvs.update(seq_mvs.copy())
