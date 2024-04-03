@@ -23,9 +23,9 @@ ratings, movies = ass01.read("../dataset/ratings.csv", "../dataset/movies.csv") 
 pred_mvs, sim_users = ass02.get_predicted_mvs(USERS, ratings, movies, args.function)
 
 if args.method == 'seq':
-    seq_mvs = ass03.sequential_recommendation(N_ITERATIONS, N_FILMS, USERS, pred_mvs, sim_users, ratings)
+    seq_mvs = ass03.sequential_recommendation(N_ITERATIONS, N_FILMS, USERS, pred_mvs, sim_users, ratings) #get sequential recommendations with Hybrid Aggregation Model
 elif args.method == 'msd':
-    seq_mvs = ass03.sequential_msd_recommendation(N_ITERATIONS, N_FILMS, USERS, pred_mvs, sim_users, ratings)
+    seq_mvs = ass03.sequential_msd_recommendation(N_ITERATIONS, N_FILMS, USERS, pred_mvs, sim_users, ratings) #get sequential recommendations with Hybrid Aggregation + MSD Model
 
 print(f'Top 10 films to suggest to users {USERS} in input with {args.method} method and {args.function} similarity function are {ass02.get_titles(seq_mvs, movies)}')
 

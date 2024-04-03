@@ -15,7 +15,7 @@ def get_all_predictions(userA, ratings, movies, column, top10usr, dict):
 def get_top10(map):
     return dict(sorted(map.items(), key=lambda x:x[1]['msd'], reverse=False)[:10])
 
-def get_titles(top10, movies):
+def get_titles(top10, movies): #function to get titles of the most recommended movies
     top10_titles = dict()
     for movie in top10.keys():
         value = top10[movie]
@@ -28,7 +28,7 @@ def get_predicted_mvs(input_users, ratings, movies, function): #function that ge
     similar_users = dict()
     df_users = ass01.get_all_users(ratings)
     for user in input_users:
-        user_ratings = ass01.get_usr_rows(ratings, 'userId', user)
+        user_ratings = ass01.get_usr_rows(ratings, 'userId', user) #get all ratings rows of a user
         topusers = dict()
         ass01.get_all_similarities(user, user_ratings, ratings, df_users, topusers, function) #get the similarity on every user of df
         top10usr = ass01.get_top10(topusers) #get top 10 users similar to user in input
@@ -49,7 +49,7 @@ def get_predicted_mvs(input_users, ratings, movies, function): #function that ge
 
     return (pred_movies, similar_users)
 
-def avg_function(users, similar_users, movie, pred_movies, ratings):
+def avg_function(users, similar_users, movie, pred_movies, ratings): #function to get average prediction for a group of users on a specific movie in input
     avg = 0
     for user in users:
         pred = 0
@@ -72,14 +72,14 @@ def avg_function(users, similar_users, movie, pred_movies, ratings):
   
     return avg/len(users) #get the mean of the scores as the group score
 
-def avg_method(users, pred_movies, similar_users, ratings):
+def avg_method(users, pred_movies, similar_users, ratings): #Average method function
     for movie in pred_movies.keys():
-        avg = avg_function(users, similar_users, movie, pred_movies, ratings)
+        avg = avg_function(users, similar_users, movie, pred_movies, ratings) #get the average prediction for a group of users on a specific movie in input
         pred_movies[movie] = avg #update the group score for the movie as average method
 
     return pred_movies
 
-def least_misery_function(users, similar_users, movie, pred_movies, ratings):
+def least_misery_function(users, similar_users, movie, pred_movies, ratings): #function to get the minimum prediction for a group of users on a specific movie in input
     for user in users:
         try:
             pred_movies[movie][user] #try if this movie has already been predicted for user in input
@@ -99,17 +99,17 @@ def least_misery_function(users, similar_users, movie, pred_movies, ratings):
 
     return min(dict(pred_movies[movie]).values()) #get the minimum value of predictions as group score 
 
-def least_misery_method(users, pred_movies, similar_users, ratings):
+def least_misery_method(users, pred_movies, similar_users, ratings): #Least Misery method function
     for movie in pred_movies.keys():
-        min = least_misery_function(users, similar_users, movie, pred_movies, ratings)
-        pred_movies[movie] =  min #update the group score for the movie as least misery method
+        min = least_misery_function(users, similar_users, movie, pred_movies, ratings) #get the Least Misery score for a group of users on a specific movie in input
+        pred_movies[movie] =  min #update the group score for the movie as Least Misery method
 
     return pred_movies
 
-def mean_squared_deviation_method(users, pred_movies, similar_users, ratings):
+def mean_squared_deviation_method(users, pred_movies, similar_users, ratings): #Mean Squared Deviation method function
     for movie in pred_movies.keys():
-        avg = avg_function(users, similar_users, movie, pred_movies, ratings)
+        avg = avg_function(users, similar_users, movie, pred_movies, ratings) #get the average prediction for a group of users on a specific movie in input
         msd = np.sqrt((np.sum(np.array(list(dict(pred_movies[movie]).values())) - avg)**2)/len(users)) #mean squared deviation between single user prediction and avg prediction of group of users for the movie
-        pred_movies[movie] = {'avg' : avg, 'msd' : msd} #update the group score for the movie as msd method
+        pred_movies[movie] = {'avg' : avg, 'msd' : msd} #update the group score for the movie as MSD method
 
     return pred_movies
