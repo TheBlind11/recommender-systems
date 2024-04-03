@@ -92,7 +92,7 @@ def prediction(userId, top10, movieId, ratings): #prediction function
     if bool(set):
         for user in merged_users:
             df_userB = ratings[ratings['userId'] == user]
-            sim = top10.get(user) #get pearson correlation value between the users
+            sim = top10.get(user) #get correlation value between the users
             if not math.isnan(sim):
                 num += sim * (df_userB[df_userB['movieId'] == movieId].iloc[0]['rating'] - df_userB['rating'].mean())
                 den += sim
